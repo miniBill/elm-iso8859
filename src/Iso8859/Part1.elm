@@ -1,4 +1,4 @@
-module ISO8859_1 exposing (decode, encode)
+module Iso8859.Part1 exposing (decode, encode)
 
 import Bytes exposing (Bytes)
 import Bytes.Decode
