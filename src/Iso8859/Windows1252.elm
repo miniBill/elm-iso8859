@@ -1,4 +1,4 @@
-module Iso8859.Part1 exposing (decode, encode)
+module Iso8859.Windows1252 exposing (decode, encode)
 
 import Bytes exposing (Bytes)
 import Bytes.Decode
@@ -9,7 +9,7 @@ import Maybe.Extra
 
 latin1Supplement : String
 latin1Supplement =
-    """\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"""
+    """€.‚ƒ„…†‡ˆ‰Š‹Œ.Ž.‘’“”•–—˜™š›œ.žŸ\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"""
 
 
 decodeDict : Dict Int Char
@@ -17,14 +17,22 @@ decodeDict =
     let
         ascii : List ( Int, Char )
         ascii =
-            List.range 0 0x7E
+            List.range 0 0x7F
                 |> List.map (\i -> ( i, Char.fromCode i ))
 
         latin1List : List ( Int, Char )
         latin1List =
             latin1Supplement
                 |> String.toList
-                |> List.indexedMap (\index c -> ( index + 0xA0, c ))
+                |> List.indexedMap
+                    (\index c ->
+                        if c /= '.' then
+                            Just ( index + 0x80, c )
+
+                        else
+                            Nothing
+                    )
+                |> List.filterMap identity
     in
     (ascii ++ latin1List)
         |> Dict.fromList
