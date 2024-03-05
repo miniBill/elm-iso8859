@@ -1,15 +1,19 @@
 module Iso8859.Windows1252 exposing (decode, encode)
 
+{-| Encode and decode strings according the [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252) encoding.
+
+@docs decode, encode
+
+-}
+
 import Bytes exposing (Bytes)
-import Bytes.Decode
-import Bytes.Encode
 import Dict exposing (Dict)
-import Maybe.Extra
+import Iso8859
 
 
-latin1Supplement : String
-latin1Supplement =
-    """€.‚ƒ„…†‡ˆ‰Š‹Œ.Ž.‘’“”•–—˜™š›œ.žŸ\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"""
+specific : String
+specific =
+    "€.‚ƒ„…†‡ˆ‰Š‹Œ.Ž.‘’“”•–—˜™š›œ.žŸ"
 
 
 decodeDict : Dict Int Char
@@ -20,9 +24,9 @@ decodeDict =
             List.range 0 0x7F
                 |> List.map (\i -> ( i, Char.fromCode i ))
 
-        latin1List : List ( Int, Char )
-        latin1List =
-            latin1Supplement
+        specificList : List ( Int, Char )
+        specificList =
+            specific
                 |> String.toList
                 |> List.indexedMap
                     (\index c ->
@@ -33,66 +37,30 @@ decodeDict =
                             Nothing
                     )
                 |> List.filterMap identity
+
+        latin1List : List ( Int, Char )
+        latin1List =
+            List.range 0xA0 0xFF
+                |> List.map (\i -> ( i, Char.fromCode i ))
     in
-    (ascii ++ latin1List)
+    (ascii ++ specificList ++ latin1List)
         |> Dict.fromList
 
 
 encodeDict : Dict Char Int
 encodeDict =
-    decodeDict
-        |> Dict.toList
-        |> List.map (\( k, v ) -> ( v, k ))
-        |> Dict.fromList
+    Iso8859.reverseDict decodeDict
 
 
+{-| Encode a string according to the [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252) encoding. Returns `Nothing` if any of the characters are unsupported.
+-}
 encode : String -> Maybe Bytes
 encode input =
-    input
-        |> String.toList
-        |> Maybe.Extra.combineMap encodeChar
-        |> Maybe.map
-            (\bytes ->
-                bytes
-                    |> Bytes.Encode.sequence
-                    |> Bytes.Encode.encode
-            )
+    Iso8859.encode encodeDict input
 
 
-encodeChar : Char -> Maybe Bytes.Encode.Encoder
-encodeChar c =
-    Dict.get c encodeDict
-        |> Maybe.map Bytes.Encode.unsignedInt8
-
-
+{-| Decode a string according to the [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252) encoding. Returns `Nothing` if any of the characters are unsupported.
+-}
 decode : Bytes -> Maybe String
 decode bytes =
-    let
-        decoder : Bytes.Decode.Decoder String
-        decoder =
-            Bytes.Decode.loop ( Bytes.width bytes, [] )
-                (\( remaining, acc ) ->
-                    if remaining <= 0 then
-                        acc
-                            |> List.reverse
-                            |> String.fromList
-                            |> Bytes.Decode.Done
-                            |> Bytes.Decode.succeed
-
-                    else
-                        Bytes.Decode.unsignedInt8
-                            |> Bytes.Decode.andThen decodeChar
-                            |> Bytes.Decode.map (\char -> Bytes.Decode.Loop ( remaining - 1, char :: acc ))
-                )
-    in
-    Bytes.Decode.decode decoder bytes
-
-
-decodeChar : Int -> Bytes.Decode.Decoder Char
-decodeChar char =
-    case Dict.get char decodeDict of
-        Nothing ->
-            Bytes.Decode.fail
-
-        Just c ->
-            Bytes.Decode.succeed c
+    Iso8859.decode decodeDict bytes
