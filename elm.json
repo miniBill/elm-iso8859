@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "miniBill/elm-iso8859",
-    "summary": "Convert strings from and into ISO/IEC 8859.",
+    "summary": "Encode and decode strings with ISO/IEC 8859 or Windows-1252.",
     "license": "MIT",
     "version": "1.0.0",
     "exposed-modules": [
