@@ -28,23 +28,23 @@ part1 =
         [ fuzz Fuzz.asciiString "Is the same as UTF-8 on ASCII" <|
             \input ->
                 input
-                    |> Iso8859.Part1.encode
+                    |> Iso8859.Part1.fromString
                     |> Expect.equal (Just <| Bytes.Encode.encode <| Bytes.Encode.string input)
         , fuzz Fuzz.asciiString "It can encode ASCII strings" <|
             \input ->
                 input
-                    |> Iso8859.Part1.encode
+                    |> Iso8859.Part1.fromString
                     |> Expect.notEqual Nothing
         , fuzz (fuzzer iso8859_1) "It can encode included characters" <|
             \input ->
                 input
-                    |> Iso8859.Part1.encode
+                    |> Iso8859.Part1.fromString
                     |> Expect.notEqual Nothing
         , fuzz Fuzz.asciiString "It roundtrips on ASCII strings" <|
             \input ->
                 input
-                    |> Iso8859.Part1.encode
-                    |> Maybe.andThen Iso8859.Part1.decode
+                    |> Iso8859.Part1.fromString
+                    |> Maybe.andThen Iso8859.Part1.toString
                     |> Expect.equal (Just input)
         , fuzz (fuzzer iso8859_1) "It roundtrips on included characters" <|
             \input ->
@@ -52,12 +52,12 @@ part1 =
                     encoded : Maybe Bytes
                     encoded =
                         input
-                            |> Iso8859.Part1.encode
+                            |> Iso8859.Part1.fromString
 
                     decoded : Maybe String
                     decoded =
                         encoded
-                            |> Maybe.andThen Iso8859.Part1.decode
+                            |> Maybe.andThen Iso8859.Part1.toString
 
                     _ =
                         if decoded /= Just input then
@@ -78,28 +78,28 @@ windows =
         [ fuzz Fuzz.asciiString "Is the same as UTF-8 on ASCII" <|
             \input ->
                 input
-                    |> Iso8859.Windows1252.encode
+                    |> Iso8859.Windows1252.fromString
                     |> Expect.equal (Just <| Bytes.Encode.encode <| Bytes.Encode.string input)
         , fuzz Fuzz.asciiString "It can encode ASCII strings" <|
             \input ->
                 input
-                    |> Iso8859.Windows1252.encode
+                    |> Iso8859.Windows1252.fromString
                     |> Expect.notEqual Nothing
         , fuzz (fuzzer windows1252) "It can encode included characters" <|
             \input ->
                 input
-                    |> Iso8859.Windows1252.encode
+                    |> Iso8859.Windows1252.fromString
                     |> Expect.notEqual Nothing
         , fuzz (fuzzer iso8859_1) "It's the same as ISO8859-1 on characters supported by both" <|
             \input ->
                 input
-                    |> Iso8859.Windows1252.encode
-                    |> Expect.equal (Iso8859.Part1.encode input)
+                    |> Iso8859.Windows1252.fromString
+                    |> Expect.equal (Iso8859.Part1.fromString input)
         , fuzz Fuzz.asciiString "It roundtrips on ASCII strings" <|
             \input ->
                 input
-                    |> Iso8859.Windows1252.encode
-                    |> Maybe.andThen Iso8859.Windows1252.decode
+                    |> Iso8859.Windows1252.fromString
+                    |> Maybe.andThen Iso8859.Windows1252.toString
                     |> Expect.equal (Just input)
         , fuzz (fuzzer windows1252) "It roundtrips on included characters" <|
             \input ->
@@ -107,12 +107,12 @@ windows =
                     encoded : Maybe Bytes
                     encoded =
                         input
-                            |> Iso8859.Windows1252.encode
+                            |> Iso8859.Windows1252.fromString
 
                     decoded : Maybe String
                     decoded =
                         encoded
-                            |> Maybe.andThen Iso8859.Windows1252.decode
+                            |> Maybe.andThen Iso8859.Windows1252.toString
 
                     _ =
                         if decoded /= Just input then

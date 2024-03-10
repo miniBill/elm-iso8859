@@ -12,6 +12,6 @@ import Iso8859.Part1
 
 encoded : Maybe Bytes
 encoded =
-    Iso8859.Part1.encode "Caffé"
+    Iso8859.Part1.fromString "Caffé"
     --> 43 61 66 66 e9
 ```

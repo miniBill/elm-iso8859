@@ -1,4 +1,4 @@
-module Iso8859 exposing (decode, encode, reverseDict)
+module Iso8859 exposing (fromString, reverseDict, toString)
 
 import Bytes exposing (Bytes)
 import Bytes.Decode
@@ -7,8 +7,8 @@ import Dict exposing (Dict)
 import Maybe.Extra
 
 
-encode : Dict Char Int -> String -> Maybe Bytes
-encode encodeDict input =
+fromString : Dict Char Int -> String -> Maybe Bytes
+fromString encodeDict input =
     input
         |> String.toList
         |> Maybe.Extra.combineMap
@@ -24,8 +24,8 @@ encode encodeDict input =
             )
 
 
-decode : Dict Int Char -> Bytes.Bytes -> Maybe String
-decode decodeDict bytes =
+toString : Dict Int Char -> Bytes.Bytes -> Maybe String
+toString decodeDict bytes =
     let
         decoder : Bytes.Decode.Decoder String
         decoder =

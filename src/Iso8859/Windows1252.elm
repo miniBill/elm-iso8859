@@ -1,8 +1,8 @@
-module Iso8859.Windows1252 exposing (decode, encode)
+module Iso8859.Windows1252 exposing (toString, fromString)
 
 {-| Encode and decode strings according the [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252) encoding.
 
-@docs decode, encode
+@docs toString, fromString
 
 -}
 
@@ -54,13 +54,13 @@ encodeDict =
 
 {-| Encode a string according to the [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252) encoding. Returns `Nothing` if any of the characters are unsupported.
 -}
-encode : String -> Maybe Bytes
-encode input =
-    Iso8859.encode encodeDict input
+fromString : String -> Maybe Bytes
+fromString input =
+    Iso8859.fromString encodeDict input
 
 
 {-| Decode a string according to the [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252) encoding. Returns `Nothing` if any of the characters are unsupported.
 -}
-decode : Bytes -> Maybe String
-decode bytes =
-    Iso8859.decode decodeDict bytes
+toString : Bytes -> Maybe String
+toString bytes =
+    Iso8859.toString decodeDict bytes
