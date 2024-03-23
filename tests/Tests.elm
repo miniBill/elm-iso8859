@@ -41,34 +41,9 @@ part1 =
                     |> Iso8859.Part1.fromString
                     |> Expect.notEqual Nothing
         , fuzz Fuzz.asciiString "It roundtrips on ASCII strings" <|
-            \input ->
-                input
-                    |> Iso8859.Part1.fromString
-                    |> Maybe.andThen Iso8859.Part1.toString
-                    |> Expect.equal (Just input)
+            checkRoundrip Iso8859.Part1.fromString Iso8859.Part1.toString
         , fuzz (fuzzer iso8859_1) "It roundtrips on included characters" <|
-            \input ->
-                let
-                    encoded : Maybe Bytes
-                    encoded =
-                        input
-                            |> Iso8859.Part1.fromString
-
-                    decoded : Maybe String
-                    decoded =
-                        encoded
-                            |> Maybe.andThen Iso8859.Part1.toString
-
-                    _ =
-                        if decoded /= Just input then
-                            Debug.log "Encoded as"
-                                (Maybe.map Hex.Convert.toString encoded)
-
-                        else
-                            Just ""
-                in
-                decoded
-                    |> Expect.equal (Just input)
+            checkRoundrip Iso8859.Part1.fromString Iso8859.Part1.toString
         ]
 
 
@@ -96,35 +71,35 @@ windows =
                     |> Iso8859.Windows1252.fromString
                     |> Expect.equal (Iso8859.Part1.fromString input)
         , fuzz Fuzz.asciiString "It roundtrips on ASCII strings" <|
-            \input ->
-                input
-                    |> Iso8859.Windows1252.fromString
-                    |> Maybe.andThen Iso8859.Windows1252.toString
-                    |> Expect.equal (Just input)
+            checkRoundrip Iso8859.Windows1252.fromString Iso8859.Windows1252.toString
         , fuzz (fuzzer windows1252) "It roundtrips on included characters" <|
-            \input ->
-                let
-                    encoded : Maybe Bytes
-                    encoded =
-                        input
-                            |> Iso8859.Windows1252.fromString
-
-                    decoded : Maybe String
-                    decoded =
-                        encoded
-                            |> Maybe.andThen Iso8859.Windows1252.toString
-
-                    _ =
-                        if decoded /= Just input then
-                            Debug.log "Encoded as"
-                                (Maybe.map Hex.Convert.toString encoded)
-
-                        else
-                            Just ""
-                in
-                decoded
-                    |> Expect.equal (Just input)
+            checkRoundrip Iso8859.Windows1252.fromString Iso8859.Windows1252.toString
         ]
+
+
+checkRoundrip : (String -> Maybe Bytes) -> (Bytes -> Maybe String) -> String -> Expect.Expectation
+checkRoundrip fromString toString input =
+    let
+        encoded : Maybe Bytes
+        encoded =
+            input
+                |> fromString
+
+        decoded : Maybe String
+        decoded =
+            encoded
+                |> Maybe.andThen toString
+
+        _ =
+            if decoded /= Just input then
+                Debug.log "Encoded as"
+                    (Maybe.map Hex.Convert.toString encoded)
+
+            else
+                Just ""
+    in
+    decoded
+        |> Expect.equal (Just input)
 
 
 fuzzer : String -> Fuzzer String
